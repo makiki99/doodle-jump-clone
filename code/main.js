@@ -2,24 +2,25 @@ var game = new Phaser.Game(480, 640, Phaser.AUTO, '');
 
 game.state.add('play', {
 	self: this,
+	deathPos: 2500,
 
 	preload: function(){
-		//assets
+		// assets
 		game.load.image("player", "assets/player.png");
 		game.load.image("bg", "assets/bg.png");
 		game.load.image("platform", "assets/platform.png");
 	},
 
 	create: function(){
-		//starts physics
+		// starts physics
 		game.physics.startSystem(Phaser.Physics.ARCADE)
-		//background
+		// background
 		this.background = game.add.sprite(0,0,"bg");
-		//player
+		// player
 		this.player = game.add.sprite(220,540,"player");
 		game.physics.arcade.enable(this.player);
 		this.player.body.gravity.y = 2000;
-		//platforms
+		// platforms
 		this.platforms = game.add.group();
 		this.platforms.enableBody = true;
 		for (let i = 0; i < 16; i++) {
@@ -30,7 +31,6 @@ game.state.add('play', {
 		this.platforms.children.forEach(
 			// assigns proper properties to all platforms
 			i => {
-				i.exists = true;
 				i.body.immovable = true;
 				// properties below are needed to make jumping from below possible
 				i.body.checkCollision.down = false;
@@ -38,7 +38,7 @@ game.state.add('play', {
 				i.body.checkCollision.right = false;
 			}
 		)
-		//floor
+		// floor
 		this.floor = game.add.group();
 		this.floor.enableBody = true;
 		for (var i = 0; i < 6; i++) {
@@ -65,12 +65,12 @@ game.state.add('play', {
 		if (true) {
 			this.player.body.velocity.x += 250;
 		}
-		//move world bounduaries to create illusion of infinite world
+		// move world bounduaries to create illusion of infinite world
 		let position = -320+this.player.y;
 		game.world.setBounds(0, position, 480, 640);
-		//move background
+		// move background
 		this.background.y = game.world.y;
-		//move platforms from below screen to top of it
+		// move platforms from below screen to top of it
 		this.platforms.children.forEach(
 			i => {
 				if (i.y > game.world.y+700) {
@@ -79,7 +79,17 @@ game.state.add('play', {
 				}
 			}
 		)
-		//remove floor after certain point of the screen
+		// check if player is below death barrier
+		if (this.player.y > this.deathPos) {
+			// we kill the player instead of destroying him
+			// the reason is we would crash the game since there is still code that references player
+			this.player.kill();
+		}
+		// move death barrier
+		if (this.deathPos > game.world.y+2500) {
+			this.deathPos = game.world.y+2500;
+		}
+		// remove floor after certain point of the screen
 		if (-700 > game.world.y) {
 			// we won't need the floor anymore, so we can remove it to free memory
 			this.floor.destroy();
@@ -87,5 +97,5 @@ game.state.add('play', {
 	}
 });
 
-//begins the game
+// begins the game
 game.state.start('play');
