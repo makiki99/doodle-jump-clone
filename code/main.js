@@ -11,7 +11,6 @@ game.state.add('play', {
 	},
 
 	create: function(){
-		//creates proper bounduaries
 		//starts physics
 		game.physics.startSystem(Phaser.Physics.ARCADE)
 		//background
