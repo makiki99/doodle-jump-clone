@@ -16,16 +16,16 @@ game.state.add('play', {
 		//background
 		this.background = game.add.sprite(0,0,"bg");
 		//player
-		this.player = game.add.sprite(220,360,"player");
+		this.player = game.add.sprite(220,540,"player");
 		game.physics.arcade.enable(this.player);
 		this.player.body.gravity.y = 2000;
 		//platforms
 		this.platforms = game.add.group();
 		this.platforms.enableBody = true;
-		for (let i = 0; i < 128; i++) {
+		for (let i = 0; i < 16; i++) {
 			// create buffer of platforms, because constantly deleting and creating
 			// objects is slow
-			this.platforms.create(Math.random()*387,i*(64),"platform");
+			this.platforms.create(Math.random()*387,i*50-300,"platform");
 		}
 		this.platforms.children.forEach(
 			// assigns proper properties to all platforms
@@ -38,18 +38,24 @@ game.state.add('play', {
 				i.body.checkCollision.right = false;
 			}
 		)
-		for (var i = 122; i < 128; i++) {
-			// sets up floor
-			this.platforms.children[i].x = (i-122)*93-41;
-			this.platforms.children[i].y = 630;
-			this.platforms.children[i].exists = true;
+		//floor
+		this.floor = game.add.group();
+		this.floor.enableBody = true;
+		for (var i = 0; i < 6; i++) {
+			this.floor.create(i*93-41,630,"platform");
 		}
+		this.floor.children.forEach(
+			i => {
+				i.body.immovable = true;
+			}
+		)
 	},
 
 	update: function(){
 		// checks collision against platforms
-		var hitPlatform = game.physics.arcade.collide(this.player, this.platforms);
-		if (hitPlatform) {
+		let hitPlatform = game.physics.arcade.collide(this.player, this.platforms);
+		let hitFloor = game.physics.arcade.collide(this.player, this.floor);
+		if (hitPlatform || hitFloor) {
 			// when collision occurs, perform a jump
 			this.player.body.velocity.y = -1050;
 		}
@@ -60,7 +66,8 @@ game.state.add('play', {
 			this.player.body.velocity.x += 250;
 		}
 		//move world bounduaries to create illusion of infinite world
-		game.world.setBounds(0, -320+this.player.y, 480, 640);
+		let position = -320+this.player.y;
+		game.world.setBounds(0, position, 480, 640);
 		//move background
 		this.background.y = game.world.y;
 	}
