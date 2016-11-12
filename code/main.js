@@ -70,8 +70,22 @@ game.state.add('play', {
 		game.world.setBounds(0, position, 480, 640);
 		//move background
 		this.background.y = game.world.y;
+		//move platforms from below screen to top of it
+		this.platforms.children.forEach(
+			i => {
+				if (i.y > game.world.y+700) {
+					i.y -= 800;
+					i.x = Math.random()*387;
+				}
+			}
+		)
+		//remove floor after certain point of the screen
+		if (-700 > game.world.y) {
+			// we won't need the floor anymore, so we can remove it to free memory
+			this.floor.destroy();
+		}
 	}
 });
 
-//begins a game
+//begins the game
 game.state.start('play');
